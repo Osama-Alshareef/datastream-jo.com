@@ -107,73 +107,88 @@
             position: relative;
         }
 
-        /* Rope Toggle */
-        .rope-toggle {
+        /* Lamp Toggle */
+        .lamp-toggle {
             position: fixed;
-            top: -10px;
+            top: 20px;
             right: 50px;
             z-index: 1000;
-            touch-action: none;
-            user-select: none;
         }
 
-        .rope {
-            width: 6px;
-            height: 120px;
-            background: repeating-linear-gradient(
-                to bottom,
-                #8b7355 0px,
-                #6b5845 3px,
-                #8b7355 6px,
-                #7a6850 9px,
-                #8b7355 12px
-            );
-            border-radius: 3px;
-            box-shadow:
-                0 2px 8px rgba(0, 0, 0, 0.4),
-                inset -1px 0 2px rgba(0, 0, 0, 0.3),
-                inset 1px 0 1px rgba(255, 255, 255, 0.1);
+        .lamp-cord {
+            width: 2px;
+            height: 50px;
+            background: linear-gradient(to bottom, #333, #555);
+            margin: 0 auto;
+            border-radius: 1px;
+        }
+
+        .lamp-shade {
+            width: 50px;
+            height: 35px;
+            background: linear-gradient(to bottom, var(--text-primary), var(--text-muted));
+            border-radius: 0 0 25px 25px;
             position: relative;
-            transform-origin: top center;
-            cursor: grab;
-            transition: none;
+            margin: 0 auto;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
 
-        .rope:active {
-            cursor: grabbing;
-        }
-
-        .rope::before {
+        .lamp-shade::before {
             content: '';
             position: absolute;
-            top: 0;
+            bottom: 0;
             left: 50%;
-            width: 8px;
-            height: 8px;
-            background: #4a4a4a;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            transform: translateX(-50%);
+            width: 30px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 0 0 15px 15px;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
         }
 
-        .rope::after {
-            content: '';
+        [data-theme="light"] .lamp-shade::before {
+            opacity: 1;
+            box-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary);
+        }
+
+        .lamp-switch {
             position: absolute;
-            bottom: -16px;
+            bottom: -30px;
             left: 50%;
-            width: 28px;
-            height: 28px;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .lamp-switch label {
+            cursor: pointer;
+            display: block;
+        }
+
+        .lamp-switch input {
+            display: none;
+        }
+
+        .lamp-switch span {
+            display: block;
+            width: 16px;
+            height: 16px;
             background: radial-gradient(circle at 35% 35%, #a0826d, #6b5845);
             border-radius: 50%;
-            transform: translateX(-50%);
             box-shadow:
-                0 4px 12px rgba(0, 0, 0, 0.4),
-                inset -2px -2px 4px rgba(0, 0, 0, 0.3),
-                inset 2px 2px 3px rgba(255, 255, 255, 0.15);
+                0 2px 6px rgba(0, 0, 0, 0.4),
+                inset -1px -1px 2px rgba(0, 0, 0, 0.3),
+                inset 1px 1px 2px rgba(255, 255, 255, 0.15);
+            transition: transform 0.2s ease;
         }
 
-        .rope.animating {
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        .lamp-switch span:hover {
+            transform: scale(1.1);
+        }
+
+        .lamp-switch span:active {
+            transform: scale(0.95) translateY(2px);
         }
 
         .logo {
@@ -656,134 +671,34 @@
         </footer>
     </div>
 
-    <!-- Rope Toggle for Theme -->
-    <div class="rope-toggle">
-        <div class="rope" id="rope"></div>
+    <!-- Lamp Toggle for Theme -->
+    <div class="lamp-toggle">
+        <div class="lamp-cord"></div>
+        <div class="lamp-shade">
+            <form class="lamp-switch">
+                <label>
+                    <input type="checkbox" id="lampSwitch" />
+                    <span></span>
+                </label>
+            </form>
+        </div>
     </div>
 
     <script>
-        // Draggable rope with physics
-        const rope = document.getElementById('rope');
+        // Lamp toggle functionality
         const html = document.documentElement;
+        const lampSwitch = document.getElementById('lampSwitch');
 
         // Check for saved theme preference or default to 'dark'
         const currentTheme = localStorage.getItem('theme') || 'dark';
         html.setAttribute('data-theme', currentTheme);
+        lampSwitch.checked = currentTheme === 'light';
 
-        let isDragging = false;
-        let startY = 0;
-        let startX = 0;
-        let currentY = 0;
-        let currentX = 0;
-        let velocityY = 0;
-        let velocityX = 0;
-        const maxPull = 150; // Maximum pull distance in pixels
-        const pullThreshold = 80; // Threshold to trigger theme change
-
-        // Spring physics constants
-        const springStrength = 0.15;
-        const damping = 0.75;
-
-        function updateRopeTransform(x, y) {
-            // Calculate stretch based on pull distance
-            const stretchFactor = 1 + (y / 300);
-            const clampedStretch = Math.min(Math.max(stretchFactor, 1), 1.5);
-
-            // Apply resistance as we approach max pull
-            const resistance = Math.pow(y / maxPull, 0.7);
-            const resistedY = y * (1 - resistance * 0.5);
-
-            rope.style.transform = `translate(${x}px, ${resistedY}px) scaleY(${clampedStretch}) rotate(${x * 0.1}deg)`;
-        }
-
-        function handleStart(e) {
-            isDragging = true;
-            rope.classList.remove('animating');
-
-            const touch = e.type.includes('touch') ? e.touches[0] : e;
-            startY = touch.clientY - currentY;
-            startX = touch.clientX - currentX;
-
-            velocityY = 0;
-            velocityX = 0;
-        }
-
-        function handleMove(e) {
-            if (!isDragging) return;
-
-            e.preventDefault();
-            const touch = e.type.includes('touch') ? e.touches[0] : e;
-
-            const newY = Math.max(0, Math.min(maxPull, touch.clientY - startY));
-            const newX = Math.max(-60, Math.min(60, touch.clientX - startX));
-
-            velocityY = newY - currentY;
-            velocityX = newX - currentX;
-
-            currentY = newY;
-            currentX = newX;
-
-            updateRopeTransform(currentX, currentY);
-        }
-
-        function handleEnd() {
-            if (!isDragging) return;
-            isDragging = false;
-
-            // Check if pulled enough to toggle theme
-            if (currentY >= pullThreshold) {
-                const theme = html.getAttribute('data-theme');
-                const newTheme = theme === 'dark' ? 'light' : 'dark';
-                html.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-            }
-
-            // Start spring animation back to rest position
-            rope.classList.add('animating');
-            animate();
-        }
-
-        function animate() {
-            if (isDragging) return;
-
-            // Spring physics
-            const forceY = -currentY * springStrength;
-            const forceX = -currentX * springStrength;
-
-            velocityY += forceY;
-            velocityX += forceX;
-
-            velocityY *= damping;
-            velocityX *= damping;
-
-            currentY += velocityY;
-            currentX += velocityX;
-
-            updateRopeTransform(currentX, currentY);
-
-            // Continue animation if still moving
-            if (Math.abs(velocityY) > 0.1 || Math.abs(velocityX) > 0.1 ||
-                Math.abs(currentY) > 0.1 || Math.abs(currentX) > 0.1) {
-                requestAnimationFrame(animate);
-            } else {
-                currentY = 0;
-                currentX = 0;
-                velocityY = 0;
-                velocityX = 0;
-                updateRopeTransform(0, 0);
-                rope.classList.remove('animating');
-            }
-        }
-
-        // Mouse events
-        rope.addEventListener('mousedown', handleStart);
-        document.addEventListener('mousemove', handleMove);
-        document.addEventListener('mouseup', handleEnd);
-
-        // Touch events
-        rope.addEventListener('touchstart', handleStart, { passive: false });
-        document.addEventListener('touchmove', handleMove, { passive: false });
-        document.addEventListener('touchend', handleEnd);
+        lampSwitch.addEventListener('change', function() {
+            const newTheme = this.checked ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
     </script>
 </body>
 </html>
