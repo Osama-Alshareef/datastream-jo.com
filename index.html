@@ -105,93 +105,89 @@
         header {
             padding: 32px 0;
             position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        /* Lamp Toggle */
-        .lamp-toggle {
-            position: fixed;
-            top: 20px;
-            right: 50px;
-            z-index: 1000;
-        }
-
-        .lamp-cord {
-            width: 2px;
-            height: 50px;
-            background: linear-gradient(to bottom, #333, #555);
-            margin: 0 auto;
-            border-radius: 1px;
-        }
-
-        .lamp-shade {
-            width: 50px;
-            height: 35px;
-            background: linear-gradient(to bottom, var(--text-primary), var(--text-muted));
-            border-radius: 0 0 25px 25px;
+        /* Theme Toggle Switch */
+        .theme-toggle {
             position: relative;
-            margin: 0 auto;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease;
+            width: 60px;
+            height: 30px;
         }
 
-        .lamp-shade::before {
-            content: '';
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
             position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 20px;
-            background: var(--primary);
-            border-radius: 0 0 15px 15px;
-            opacity: 0.3;
-            transition: opacity 0.3s ease;
-        }
-
-        [data-theme="light"] .lamp-shade::before {
-            opacity: 1;
-            box-shadow: 0 0 20px var(--primary), 0 0 40px var(--primary);
-        }
-
-        .lamp-switch {
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-        }
-
-        .lamp-switch label {
             cursor: pointer;
-            display: block;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border: 2px solid rgba(100, 116, 139, 0.3);
+            transition: all 0.4s ease;
+            border-radius: 30px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
-        .lamp-switch input {
-            display: none;
-        }
-
-        .lamp-switch span {
-            display: block;
-            width: 16px;
-            height: 16px;
-            background: radial-gradient(circle at 35% 35%, #a0826d, #6b5845);
+        .toggle-slider:before {
+            content: "🌙";
+            position: absolute;
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 2px;
+            background: linear-gradient(135deg, #64748b, #475569);
             border-radius: 50%;
-            box-shadow:
-                0 2px 6px rgba(0, 0, 0, 0.4),
-                inset -1px -1px 2px rgba(0, 0, 0, 0.3),
-                inset 1px 1px 2px rgba(255, 255, 255, 0.15);
-            transition: transform 0.2s ease;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
 
-        .lamp-switch span:hover {
-            transform: scale(1.1);
+        .theme-toggle input:checked + .toggle-slider {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-color: var(--primary);
         }
 
-        .lamp-switch span:active {
-            transform: scale(0.95) translateY(2px);
+        .theme-toggle input:checked + .toggle-slider:before {
+            content: "☀️";
+            transform: translateX(30px);
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+        .toggle-slider:hover {
+            border-color: var(--primary);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 8px rgba(14, 165, 233, 0.3);
         }
 
         .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            height: 48px;
+            width: auto;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .logo img:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-text {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 1.5rem;
             font-weight: 700;
@@ -199,7 +195,7 @@
             letter-spacing: -0.5px;
         }
 
-        .logo span {
+        .logo-text span {
             color: var(--primary);
         }
 
@@ -352,10 +348,11 @@
         .report-container {
             position: relative;
             width: 100%;
-            padding-bottom: 47.5%; /* 541.25/1140 ratio */
+            height: 600px;
             border-radius: 12px;
             overflow: hidden;
             background: var(--dark-light);
+            border: 1px solid var(--border-color);
         }
 
         .report-container iframe {
@@ -552,9 +549,25 @@
             .hero {
                 padding: 60px 0 80px;
             }
-            
+
             .services-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .logo img {
+                height: 36px;
+            }
+
+            .logo-text {
+                font-size: 1.2rem;
+            }
+
+            .report-container {
+                height: 400px;
+            }
+
+            header {
+                padding: 24px 0;
             }
         }
     </style>
@@ -566,8 +579,13 @@
     <div class="container">
         <header>
             <div class="logo">
-                Data<span>Stream</span>
+                <img src="favicon.png" alt="DataStream Logo">
+                <div class="logo-text">Data<span>Stream</span></div>
             </div>
+            <label class="theme-toggle">
+                <input type="checkbox" id="themeToggle">
+                <span class="toggle-slider"></span>
+            </label>
         </header>
 
         <section class="brand-mantra-section">
@@ -671,30 +689,17 @@
         </footer>
     </div>
 
-    <!-- Lamp Toggle for Theme -->
-    <div class="lamp-toggle">
-        <div class="lamp-cord"></div>
-        <div class="lamp-shade">
-            <form class="lamp-switch">
-                <label>
-                    <input type="checkbox" id="lampSwitch" />
-                    <span></span>
-                </label>
-            </form>
-        </div>
-    </div>
-
     <script>
-        // Lamp toggle functionality
+        // Theme toggle functionality
         const html = document.documentElement;
-        const lampSwitch = document.getElementById('lampSwitch');
+        const themeToggle = document.getElementById('themeToggle');
 
         // Check for saved theme preference or default to 'dark'
         const currentTheme = localStorage.getItem('theme') || 'dark';
         html.setAttribute('data-theme', currentTheme);
-        lampSwitch.checked = currentTheme === 'light';
+        themeToggle.checked = currentTheme === 'light';
 
-        lampSwitch.addEventListener('change', function() {
+        themeToggle.addEventListener('change', function() {
             const newTheme = this.checked ? 'light' : 'dark';
             html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
